@@ -1,0 +1,28 @@
+---
+- name: Fail if mandatory parameters are not set
+  ansible.builtin.fail:
+    msg: "Mandatory parameter '{{ item.name }}' must be set."
+  when: item.value is not defined
+  loop:
+    - { name: "public_nics name", value: "{{ public_nics[0].name | default(omit) }}" }
+    - { name: "public_nics macaddress", value: "{{ public_nics[0].macaddress | default(omit) }}" }
+    - { name: "private_nics name", value: "{{ private_nics[0].name | default(omit) }}" }
+    - { name: "private_nics macaddress", value: "{{ private_nics[0].macaddress | default(omit) }}" }
+
+- name: disable networkcloud configuration after installation, use netplan static configuration instead 
+  ansible.builtin.lineinfile:
+    path: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    line: "network: {config: disabled}"
+    create: yes
+
+- name: update netplan configuration for interface bounding, 2 network adapters for public connectivity, 2 network adapters for private connectivity
+  ansible.builtin.template:
+    src: 50-cloud-init.yaml.j2
+    dest: /etc/netplan/50-cloud-init.yaml
+    mode: 0600
+  register: netplan_configuration_updated
+
+- name: apply network configuration
+  ansible.builtin.shell:
+    cmd: netplan apply
+  when: netplan_configuration_updated.changed

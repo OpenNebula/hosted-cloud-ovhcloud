@@ -1,0 +1,40 @@
+network:
+  version: 2
+  ethernets:
+{% for nic in public_nics %}
+    {{ nic.name }}:
+      match:
+        macaddress: {{ nic.macaddress }}
+{% endfor %}
+{% for nic in private_nics %}
+    {{ nic.name }}:
+      match:
+        macaddress: {{ nic.macaddress }}
+{% endfor %}
+  bonds:
+    public_bond:
+      # MAC address of the server's main public interface
+      macaddress: {{ public_nics[0].macaddress }}
+      accept-ra: false
+      dhcp4: true
+      interfaces:
+{% for nic in public_nics %}
+      - {{ nic.name }}
+{% endfor %}
+      parameters:
+        mode: 802.3ad
+        lacp-rate: fast
+        transmit-hash-policy: layer3+4
+    vrack_bond:
+      # MAC address of the first private interface
+      macaddress: {{ private_nics[0].macaddress }}
+      accept-ra: false
+      dhcp4: false
+      interfaces:
+{% for nic in private_nics %}
+      - {{ nic.name }}
+{% endfor %}
+      parameters:
+        mode: 802.3ad
+        lacp-rate: fast
+        transmit-hash-policy: layer3+4

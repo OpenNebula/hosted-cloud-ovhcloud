@@ -1,0 +1,5 @@
+---
+# NOTE: These are cummulative requirements for host-cloud-ovhcloud.
+collections:
+  - name: ansible.posix
+

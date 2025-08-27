@@ -1,12 +1,29 @@
 ---
 ansible_python_interpreter: /usr/bin/python3
 
+# Settings for one-deploy-validation
 validation:
   create_vnet: false
+  run_ha_verifications: false
   conn_matrix:
-    bridge_name: br0
-    vnet_name: pubridge
+    vnet_name: vm_public
+    bridge_name: onebr25
   vm:
     check_connection: true
     market_name: 'Alpine Linux 3.20'
   run_storage_benchmark: true
+  vnet:
+    name: 'vm_public'
+    desc: 'Use public IP network for post-deployment cloud verification'
+    vn_mad: 'bridge'
+    phydev: 'vrack_bond'
+    network_address: '57.131.167.177'
+    network_mask: '255.255.255.240'
+    dns: '213.186.33.99'
+    gateway: '57.131.167.190'
+    ar:
+      - type: "IP4"
+        ip: '57.131.167.177'
+        size: '13'
+  storage_benchmark:
+    vnet_name: vm_public

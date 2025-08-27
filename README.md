@@ -1,35 +1,8 @@
-> [!IMPORTANT]
->  
-> ## First time template repo setup -- TO BE REMOVED FROM THE TEMPLATE
-> 
-> 1. Rename all occurances of "cloud-provider" to the new Cloud Provider "new-cp":
-> 
->    ```shell
->    new_cp_name=new-cp
->    find . -type f ! -name 'README.md' -not -path "./.git/*" -not -path "./submodule-one-deploy-validation/*" -exec sed -i 's/cloud-provider/'$new_cp_name'/g' {} +
->    mv inventory/cloud-provider.yml inventory/$new_cp_name.yml
->    mv playbooks/cloud-provider.yml playbooks/$new_cp_name.yml
->    ```
-> 
-> 1. The repository is ready to start working on the deployment values of OpenNebula, specific to the new Cloud Provider. Replace all `<<TBA>>` occurances:
-> 
->    ```shell
->    grep -nR "<<TBA>>" .
->    ```
->
-> 1. Update the README.md with link to the infrastructure provisions guide, that provides the starting point for this repo's steps. Update the table of required parameters in the README.md to match the provisioned infrastructure and facilitate easy extraction of the parameters by following the same variable names. Upload the logo of the cloud provider and make any necessary adjustments.
-> 
-> 1. Implement the specific automations required on the cloud providers infrastructure to make OpenNebula fully functional (public IP routing, platform-specific configurations, etc.), as tested by the validation steps.
-> 
->  1. Remove this note from the README.md
->
-
 **TBA-cloud-provider**: logos of OpenNebula and the Cloud Provider
 
-# Deploying OpenNebula as a Hosted Cloud on TBA-cloud-provider
+# Deploying OpenNebula as a Hosted Cloud on OVHcloud infrasturcture
 
-This repository contains the needed code and documentation to perform an OpenNebula deployment and configuration as 
-a Hosted Cloud on **TBA-cloud-provider** resources. It extends the [one-deploy-validation](https://github.com/OpenNebula/one-deploy-validation) repository, which is added as a git submodule.
+This repository contains the needed code and documentation to perform an OpenNebula deployment and configuration on OVHcloud infrasturcture bare-metal resources. It extends the [one-deploy-validation](https://github.com/OpenNebula/one-deploy-validation) repository, which is added as a git submodule.
 
 - [Requirements](#requirements)
 - [Infrastructure Provisioning](#infrastructure-provisioning)
@@ -44,16 +17,22 @@ a Hosted Cloud on **TBA-cloud-provider** resources. It extends the [one-deploy-v
    pip install hatch
    ```
 
-1. Initialize the dependent `one-deploy-validation` and `one-deploy` submodules
+1. Initialize the dependent `one-deploy-validation` and `one-deploy` submodule
 
    ```shell
-   git submodule update --init --remote --merge
+   git submodule update --init
    ```
 
-1. Install the `opennebula.deploy` collection with dependencies using the submodule's tooling:
+1. Install OpenNebula one-deploy dependencies using the submodule's tooling:
 
    ```shell
    make submodule-requirements
+   ```
+
+1. Install one-deploy dependencies, specific to OVHcloud deployment:
+
+   ```shell
+   make requirements-ovhcloud
    ```
 
 ## Infrastructure Provisioning
@@ -65,15 +44,21 @@ Follow the provisioning steps and extract the requiremed parameters needed to pr
 
 Update the [inventory](./inventory/) values to match the provisioned infrastructure.
 
-| Description                                 | Variable Names                      | Files/Location                                      |
-|---------------------------------------------|-------------------------------------|-----------------------------------------------------|
-| Frontend Host IP                            | `ansible_host`                      | [inventory/*.yml](./inventory/)    | 
-| KVM Host IPs                            | `ansible_host`                      | [inventory/*.yml](./inventory/)     | 
-| VXLAN PHYDEV                                 | `vn.vxlan.template.PHYDEV`          | [inventory/*.yml](./inventory/)                               | 
-| pubridge PHYDEV                              | `vn.pubridge.template.PHYDEV`       | [inventory/*.yml](./inventory/)                               | 
-| VMs Public IP Range                        | `vn.pubridge.template.AR.IP`, `vn.pubridge.template.AR.SIZE` | [inventory/*.yml](./inventory/)           | 
-| GUI password of `oneadmin`       | `one_pass` | [inventory/*.yml](./inventory/)           | 
-|  **{Cloud Provider's params}** |  **{Name of variable}** |  **{Affected files}** |.
+| Description                              | Variable Names                                                | Files/Location                                         |
+|------------------------------------------|---------------------------------------------------------------|--------------------------------------------------------|
+| GUI password of `oneadmin`               | `one_pass`                                                    | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| Frontend/KVM Host IP                     | `ansible_host`                                                | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| Frontend/KVM Host public nics name       | `public_nics.name`                                            | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| Frontend/KVM Host public nics macaddress | `public_nics.macaddress`                                      | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| Frontend/KVM Host private nics name      | `private_nics.name`                                           | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| Frontend/KVM Host private nics macaddress| `private_nics.macaddress`                                     | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Public IP Range                      | `vn.vm_public.template.AR.IP`, `vn.vm_public.template.AR.SIZE`| [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Public DNS                           | `vn.vm_public.template.DNS`                                   | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Public GATEWAY                       | `vn.vm_public.template.GATEWAY`                               | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Public NETWORK MASK                  | `vn.vm_public.template.NETWORK_MASK`                          | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Private VLAN_ID                      | `vn.vm_vlan*.template.VLAN_ID`                                | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Private IP Range                     | `vn.vm_vlan*.template.AR.IP`, `vn.vm_vlan*.template.AR.SIZE`  | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
+| VMs Private NETWORK MASK                 | `vn.vm_vlan*.template.NETWORK_MASK`                           | [`inventory/ovhcloud.yml`](./inventory/ovhcloud.yml)   |
 
 ## Deployment and Validation
 
@@ -81,24 +66,31 @@ Use the provided Makefile commands to automate deployment and testing:
 
 1. Review the [inventory](./inventory/), [playbooks](./playbooks/) and [roles](./roles/) directories, following Ansible design guidelines.
 
+1. Prepare OVHcloud bare metal servers:
+
+   ```shell
+   make pre-tasks-ovhcloud
+   ```
+   This step patches ubuntu kernel for security and performance optimization. It also perform networking setup, completing interface bounding
+   leveraging on [OVHcloud Link Aggregation] (https://www.ovhcloud.com/en/bare-metal/ovhcloud-link-aggregation/) technology. If connectivity is lost, use local acces via IPMI to restore the original netplan file dumped during the early step of this ansible run or re install ubuntu on the bare metal.
+   Ansible scripts should finish without any error, and report on the number of changes performed for each hosts. If any error is reported, after the necessary troubleshooting and fixes, the deployment script can be re-executed without further cleanup steps.
+
 1. Deploy OpenNebula:
 
    ```shell
    make deployment
    ```
-
-1. Configure the deployment for the specifics of the Cloud Provider:
-
-   ```shell
-   make specifics
-   ```
+   Similarly, this should finish without any errors. After this step the cloud environment is fully functional.
 
 1. Test the deployment:
 
    ```shell
    make validation
    ```
+   Update the [inventory/group_vars/all.yaml](./inventory/group_vars/all.yaml) file to match the installation parameters based on "Required Parameters" section values.
+   If the test fails in any of the steps, after the necessary troubleshooting and fixes, the validation command can be safely re-executed. The final HTML report is only created when all tests have passed.
+   The output of the tests are compiled into a HTML report that can be found in path, printed by the automation script.
 
-For more information about the submodule's tooling, refer to its [README.md](https://github.com/OpenNebula/one-deploy-validation/blob/master/README.md) and for detailed documentation on the deployment automation refer to the [one-deploy repo](https://github.com/OpenNebula/one-deploy).
+For more information about the submodule's tooling, refer to the [one-deploy-validation's README.md](https://github.com/OpenNebula/one-deploy-validation/blob/master/README.md) and for detailed documentation on the deployment automation refer to the [one-deploy repo](https://github.com/OpenNebula/one-deploy).
 
 
