@@ -1,4 +1,5 @@
-**TBA-cloud-provider**: logos of OpenNebula and the Cloud Provider
+
+<img width="1365" height="353" alt="OpenNebula-OVHcloud" src="https://github.com/user-attachments/assets/c188233f-ceed-446c-b9b6-e7387c30b22c" />
 
 # Deploying OpenNebula as a Hosted Cloud on OVHcloud infrasturcture
 
