@@ -1,0 +1,98 @@
+---
+all:
+  vars:
+    ansible_user: ubuntu
+    ensure_keys_for: [root]
+
+    ensure_hostname: true
+    ensure_hosts: true
+
+    unattend_disable: true
+    update_pkg_cache: true
+    features:
+      evpn: false
+
+    one_version: '7.0'
+    one_pass: 'opennebula'
+    db_backend: SQLite
+    vn:
+      vm_public:
+        managed: true
+        template:
+          VN_MAD: bridge
+          PHYDEV: vrack_bond
+          AR:
+            TYPE: IP4
+            IP: 57.131.167.177
+            SIZE: 13
+          DNS: 213.186.33.99
+          NETWORK_MASK: 255.255.255.240
+          GATEWAY: 57.131.167.190
+          FILTER_IP_SPOOFING: 'NO'
+          FILTER_MAC_SPOOFING: 'NO'
+      vm_vlan100:
+        managed: true
+        template:
+          VN_MAD: 802.1Q
+          PHYDEV: vrack_bond
+          VLAN_ID: 100
+          MTU: 1500
+          AR:
+            TYPE: IP4
+            IP: 10.1.100.50
+            SIZE: 48
+          NETWORK_ADDRESS: 10.1.100.0
+          NETWORK_MASK: 255.255.255.0
+          FILTER_IP_SPOOFING: 'NO'
+          FILTER_MAC_SPOOFING: 'NO'
+      vm_vlan101:
+        managed: true
+        template:
+          VN_MAD: 802.1Q
+          PHYDEV: vrack_bond
+          VLAN_ID: 101
+          MTU: 1500
+          AR:
+            TYPE: IP4
+            IP: 10.1.101.50
+            SIZE: 48
+          NETWORK_ADDRESS: 10.1.101.0
+          NETWORK_MASK: 255.255.255.0
+          FILTER_IP_SPOOFING: 'NO'
+          FILTER_MAC_SPOOFING: 'NO'
+
+frontend:
+  hosts:
+    fe: { ansible_host: 57.131.167.160,
+          public_nics: [
+            {name: ens3f0np0, macaddress: "aa:bb:dd:cc:ee:01"},
+            {name: ens3f1np1, macaddress: "aa:bb:dd:cc:ee:02"}
+          ],
+          private_nics: [
+            {name: enp129s0f0np0, macaddress: "aa:bb:dd:cc:ee:03"},
+            {name: enp129s0f1np1, macaddress: "aa:bb:dd:cc:ee:04"}
+          ]
+        }
+
+node:
+  hosts:
+    host01: { ansible_host: 57.131.167.160,
+              public_nics: [
+                {name: ens3f0np0, macaddress: "aa:bb:dd:cc:ee:01"},
+                {name: ens3f1np1, macaddress: "aa:bb:dd:cc:ee:02"}
+              ],
+              private_nics: [
+                {name: enp129s0f0np0, macaddress: "aa:bb:dd:cc:ee:03"},
+                {name: enp129s0f1np1, macaddress: "aa:bb:dd:cc:ee:04"}
+              ]
+            }
+    host02: { ansible_host: 57.131.167.161,
+              public_nics: [
+                {name: ens3f0np0, macaddress: "aa:bb:dd:cc:ee:11"},
+                {name: ens3f1np1, macaddress: "aa:bb:dd:cc:ee:12"}
+              ],
+              private_nics: [
+                {name: enp129s0f0np0, macaddress: "aa:bb:dd:cc:ee:13"},
+                {name: enp129s0f1np1, macaddress: "aa:bb:dd:cc:ee:14"}
+              ]
+            }

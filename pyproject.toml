@@ -1,15 +1,16 @@
 [project]
-name = "cloud-provider-integration"
-version = "0.0.0"
-description = "OpenNebula deployment on Cloud Provider"
+name = "opennebula-hosted-ovhcloud"
+version = "0.0.1"
+description = "OpenNebula deployment on OVHcloud infrastructure"
 authors = ["OpenNebula <contact@opennebula.io>"]
 license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.9"
 
-[tool.hatch.envs.cloud-provider-default]
+[tool.hatch.envs.ovhcloud-default]
 skip-install = true
 installer = "uv"
 dependencies = [
-  "ansible-core"
+  "ansible-core==2.19",
+  "ansible-lint==25.7.0"
 ]

@@ -1,0 +1,178 @@
+---
+# Turn on SYN-flood protections.  Starting with 2.6.26, there is no loss
+# of TCP functionality/features under normal conditions.  When flood
+# protections kick in under high unanswered-SYN load, the system
+# should remain more stable, with a trade off of some loss of TCP
+# functionality/features (e.g. TCP Window scaling).
+- name: sysctl tuning - turn on SYN-flood protections
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.tcp_syncookies, value: 1}
+
+# Ignore source-routed packets
+- name: sysctl tuning - ignore source-routed packets
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.conf.all.accept_source_route,     value: 0}
+  - {name: net.ipv4.conf.default.accept_source_route, value: 0}
+
+# Ignore ICMP redirects from non-GW hosts
+- name: sysctl tuning - ignore ICMP redirects from non-GW hosts
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.conf.all.accept_redirects,     value: 0}
+  - {name: net.ipv4.conf.default.accept_redirects, value: 0}
+  - {name: net.ipv4.conf.all.secure_redirects,     value: 1}
+  - {name: net.ipv4.conf.default.secure_redirects, value: 1}
+
+# Don't pass traffic between networks or act as a router
+- name: sysctl tuning - don't pass traffic between networks or act as a router
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.ip_forward,                  value: 1}
+  - {name: net.ipv4.conf.all.send_redirects,     value: 1}
+  - {name: net.ipv4.conf.default.send_redirects, value: 1}
+
+# Turn on Source Address Verification in all interfaces to
+# prevent some spoofing attacks.
+- name: sysctl tuning - turn on Source Address Verification
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.conf.all.rp_filter,     value: 1}
+  - {name: net.ipv4.conf.default.rp_filter, value: 1}
+
+# Ignore ICMP broadcasts to avoid participating in Smurf attacks
+- name: sysctl tuning - ignore ICMP broadcasts to avoid participating in Smurf attacks
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.icmp_echo_ignore_broadcasts, value: 1}
+
+# Ignore bad ICMP errors
+- name: sysctl tuning - ignore bad ICMP errors
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.icmp_ignore_bogus_error_responses, value: 1}
+
+# Log spoofed, source-routed, and redirect packets
+- name: sysctl tuning - log spoofed, source-routed, and redirect packets
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.conf.all.log_martians,     value: 1}
+  - {name: net.ipv4.conf.default.log_martians, value: 1}
+
+# Addresses of mmap base, heap, stack and VDSO page are randomized
+- name: sysctl tuning - addresses of mmap base, heap, stack and VDSO page are randomized
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: kernel.randomize_va_space, value: 2}
+
+# Reboot the machine soon after a kernel panic
+- name: sysctl tuning - reboot the machine soon after a kernel panic
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: kernel.panic, value: 30}
+
+# Limit of socket listen() backlog
+- name: sysctl tuning - limit of socket listen() backlog
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.core.somaxconn, value: 4096}
+
+# Maximal number of remembered connection requests, which have not received an acknowledgment from connecting client
+- name: sysctl tuning - maximal number of remembered connection requests, which have not received an acknowledgment from connecting client
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.tcp_max_syn_backlog, value: 1024}
+
+# Maximum receive / send socket buffer size in bytes.
+- name: sysctl tuning - maximum receive / send socket buffer size in bytes
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.core.rmem_max, value: 33554432}
+  - {name: net.core.wmem_max, value: 33554432}
+
+# Enable timestamps as defined in RFC1323 with random offset
+- name: sysctl tuning - enable timestamps as defined in RFC1323 with random offset
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.tcp_timestamps, value: 1}
+
+# Window scaling
+- name: sysctl tuning - window scaling
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.tcp_window_scaling, value: 1}
+  - {name: net.ipv4.tcp_wmem, value: "8192 1048576 33554432"}
+  - {name: net.ipv4.tcp_rmem, value: "8192 1048576 33554432"}
+
+# Maximum ancillary buffer size allowed per socket
+- name: sysctl tuning - window scaling
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.core.optmem_max, value: 524287}
+
+# Maximum number of packets, queued on the INPUT side, when the interface receives packets faster than kernel can process them
+- name: sysctl tuning - maximum number of packets, queued on the INPUT side, when the interface receives packets faster than kernel can process them
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.core.netdev_max_backlog, value: 250000}
+
+# How often TCP sends out keepalive messages when keepalive is enabled
+- name: sysctl tuning - how often TCP sends out keepalive messages when keepalive is enabled
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ sysctl_file_name }}"
+  loop:
+  - {name: net.ipv4.tcp_keepalive_time, value: 3000}
