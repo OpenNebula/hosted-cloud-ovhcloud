@@ -38,7 +38,7 @@ This repository contains the needed code and documentation to perform an OpenNeb
 
 ## Infrastructure Provisioning
 
-A detailed guide to provision the required reference infrastructure is published in **[{ADD LINK TO THE GUIDE HERE}]()**.
+A detailed guide to provision the required reference infrastructure is published on OVHcloud help center: [How to deploy and verify an OpenNebula Hosted Cloud on Bare Metal servers](https://help.ovhcloud.com/csm/en-ie-dedicated-servers-opennebula-deployment?id=kb_article_view&sysparm_article=KB0074014).
 Follow the provisioning steps and extract the requiremed parameters needed to proceed with the OpenNebula deployment.
 
 ## Required Parameters
