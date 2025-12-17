@@ -5,9 +5,10 @@ description = "OpenNebula deployment on OVHcloud infrastructure"
 authors = ["OpenNebula <contact@opennebula.io>"]
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 
 [tool.hatch.envs.ovhcloud-default]
+python = "3.11"
 skip-install = true
 installer = "uv"
 dependencies = [
